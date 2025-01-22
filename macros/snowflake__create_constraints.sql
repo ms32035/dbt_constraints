@@ -32,8 +32,9 @@
         {%- if dbt_constraints.have_ownership_priv(table_relation, verify_permissions, lookup_cache) -%}
 
             {%- set rely_clause = 'NORELY' if rely_clause == '' else rely_clause -%}
+            {%- set table_format = 'ICEBERG' if table_relation.table_format == 'iceberg' else '' -%}           
             {%- set query -%}
-            ALTER TABLE {{ table_relation }} ADD CONSTRAINT {{ constraint_name }} PRIMARY KEY ( {{ columns_csv }} ) {{ rely_clause }}
+            ALTER {{ table_format }} TABLE {{ table_relation }} ADD CONSTRAINT {{ constraint_name }} PRIMARY KEY ( {{ columns_csv }} ) {{ rely_clause }}
             {%- endset -%}
             {%- do log("Creating primary key: " ~ constraint_name ~ " " ~ rely_clause, info=true) -%}
             {%- do run_query(query) -%}
@@ -73,8 +74,9 @@
         {%- if dbt_constraints.have_ownership_priv(table_relation, verify_permissions, lookup_cache) -%}
 
             {%- set rely_clause = 'NORELY' if rely_clause == '' else rely_clause -%}
+            {%- set table_format = 'ICEBERG' if table_relation.table_format == 'iceberg' else '' -%}   
             {%- set query -%}
-            ALTER TABLE {{ table_relation }} ADD CONSTRAINT {{ constraint_name }} UNIQUE ( {{ columns_csv }} ) {{ rely_clause }}
+            ALTER {{ table_format }} TABLE {{ table_relation }} ADD CONSTRAINT {{ constraint_name }} UNIQUE ( {{ columns_csv }} ) {{ rely_clause }}
             {%- endset -%}
             {%- do log("Creating unique key: " ~ constraint_name ~ " " ~ rely_clause, info=true) -%}
             {%- do run_query(query) -%}
@@ -117,8 +119,9 @@
             {%- if dbt_constraints.have_ownership_priv(fk_table_relation, verify_permissions, lookup_cache) and dbt_constraints.have_references_priv(pk_table_relation, verify_permissions, lookup_cache) -%}
 
                 {%- set rely_clause = 'NORELY' if rely_clause == '' else rely_clause -%}
+                {%- set table_format = 'ICEBERG' if table_relation.table_format == 'iceberg' else '' -%}   
                 {%- set query -%}
-                ALTER TABLE {{ fk_table_relation }} ADD CONSTRAINT {{ constraint_name }} FOREIGN KEY ( {{ fk_columns_csv }} ) REFERENCES {{ pk_table_relation }} ( {{ pk_columns_csv }} ) {{ rely_clause }}
+                ALTER {{ table_format }} TABLE {{ fk_table_relation }} ADD CONSTRAINT {{ constraint_name }} FOREIGN KEY ( {{ fk_columns_csv }} ) REFERENCES {{ pk_table_relation }} ( {{ pk_columns_csv }} ) {{ rely_clause }}
                 {%- endset -%}
                 {%- do log("Creating foreign key: " ~ constraint_name ~ " referencing " ~ pk_table_relation.identifier ~ " " ~ pk_column_names ~ " " ~ rely_clause, info=true) -%}
                 {%- do run_query(query) -%}
@@ -167,8 +170,9 @@
                 {%- set modify_statements = modify_statements.append( "COLUMN " ~ column ~ " SET NOT NULL" ) -%}
             {%- endfor -%}
             {%- set modify_statement_csv = modify_statements | join(", ") -%}
+            {%- set table_format = 'ICEBERG' if table_relation.table_format == 'iceberg' else '' -%}   
             {%- set query -%}
-                ALTER TABLE {{ table_relation }} MODIFY {{ modify_statement_csv }};
+                ALTER {{ table_format }} TABLE {{ table_relation }} MODIFY {{ modify_statement_csv }};
             {%- endset -%}
             {%- do log("Creating not null constraint for: " ~ columns_to_change | join(", ") ~ " in " ~ table_relation ~ " " ~ rely_clause, info=true) -%}
             {%- do run_query(query) -%}
