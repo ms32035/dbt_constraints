@@ -119,7 +119,7 @@
             {%- if dbt_constraints.have_ownership_priv(fk_table_relation, verify_permissions, lookup_cache) and dbt_constraints.have_references_priv(pk_table_relation, verify_permissions, lookup_cache) -%}
 
                 {%- set rely_clause = 'NORELY' if rely_clause == '' else rely_clause -%}
-                {%- set table_format = 'ICEBERG' if table_relation.table_format == 'iceberg' else '' -%}   
+                {%- set table_format = 'ICEBERG' if fk_table_relation.table_format == 'iceberg' else '' -%}   
                 {%- set query -%}
                 ALTER {{ table_format }} TABLE {{ fk_table_relation }} ADD CONSTRAINT {{ constraint_name }} FOREIGN KEY ( {{ fk_columns_csv }} ) REFERENCES {{ pk_table_relation }} ( {{ pk_columns_csv }} ) {{ rely_clause }}
                 {%- endset -%}
