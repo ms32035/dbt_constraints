@@ -194,8 +194,9 @@
 {%- macro set_rely_norely(table_relation, constraint_name, constraint_rely, rely_clause) -%}
     {%- if ( rely_clause == 'NORELY' and constraint_rely == 'true' )
             or ( rely_clause == 'RELY' and constraint_rely == 'false' ) -%}
+        {%- set table_format = 'ICEBERG' if table_relation.table_format == 'iceberg' else '' -%}
         {%- set query -%}
-        ALTER TABLE {{ table_relation }} MODIFY CONSTRAINT {{ constraint_name }} {{ rely_clause }}
+        ALTER {{ table_format }} TABLE {{ table_relation }} MODIFY CONSTRAINT {{ constraint_name }} {{ rely_clause }}
         {%- endset -%}
         {%- do log("Updating constraint: " ~ constraint_name ~ " " ~ rely_clause, info=true) -%}
         {%- do run_query(query) -%}
